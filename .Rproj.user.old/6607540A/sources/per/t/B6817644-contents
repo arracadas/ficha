@@ -1,0 +1,549 @@
+###########################
+## Ficha Night Domino    ##
+## Estadistica de juegos ##
+## Marzo 2025, jortega   ##
+###########################
+
+# load libraries
+library(tidyverse)
+library(patchwork)
+library(showtext)
+library(waffle)
+library(ggtext)
+
+##############################
+## Summary of the season    ##
+##############################
+# load trend data
+partida <- readRDS("./data/20244_winter/ficha_trend_clean.rds")
+
+# aggregate data
+rank_jugador <- partida %>%
+  select(Jugador, Jugados, Ganados, Puntos) %>% 
+  group_by(Jugador) %>% 
+  summarize(
+    Jugados = sum(Jugados,  na.rm = TRUE)
+    ,Ganados = sum(Ganados, na.rm = TRUE)
+    ,GanadosPerc = round(Ganados/Jugados, 2)
+    ,Puntos = sum(Puntos)
+    ,.groups = 'drop'
+  ) %>% 
+  ungroup() %>% 
+  mutate(SE = sqrt(GanadosPerc * (1-GanadosPerc)/Jugados)) %>% 
+  mutate(CE = 1.96*SE) %>% 
+  arrange(desc(Puntos))
+
+# reorder jugadors
+rank_jugador <- rank_jugador %>%
+  mutate(Jugador = fct_relevel(Jugador, c("Jorge", "Piztache", "Rober", "Kilo", "Jerry")))
+
+# ganados as % of total
+base <- ggplot(rank_jugador, aes(x = Jugador, y = GanadosPerc)) +
+  geom_bar(stat = "identity", width = 0.6, alpha = 0.9, fill = "steelblue3") +
+  scale_y_continuous(labels = scales::percent, limits = c(0,1)) +
+  ggtitle("Ganados en porcentaje")
+
+
+base +
+  # add reference line on 50%
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "orange2") +
+  # add CE
+  geom_pointrange(aes(y = GanadosPerc, x = Jugador, ymin = GanadosPerc - CE, ymax = GanadosPerc + CE),
+                  colour = "lightsteelblue2", alpha = 0.4, size = 0.4) +
+  # minimal theme
+  theme_minimal() +
+  # switch to horizontal bar
+  coord_flip() +
+  # add labels
+  geom_text(aes(label = scales::percent(GanadosPerc)), vjust = 0.3, hjust = 1.3, color = "snow1", fontface = "bold") +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    #axis.text.x = element_blank(),
+    plot.title = element_text(face = "bold", color = "brown3"),
+    axis.text.y = element_text(size = 12, color = "grey54", face = "bold"),
+    aspect.ratio = 0.25
+  ) +
+  # remove headers
+  labs(x = "", y = "")
+
+
+# won and lost as percentage by player
+waffle_score <- partida %>%
+  group_by(Jugador) %>%
+  summarize(Jugados = sum(Jugados, na.rm = TRUE)
+            ,Ganados = sum(Ganados, na.rm = TRUE)
+            ,Perdidos = Jugados - Ganados
+            ,.groups = 'drop')
+
+# add percentages
+  mutate(Ganados = round(Ganados/Jugados, 2)*100) %>% 
+  mutate(Perdidos = round(Perdidos/Jugados, 2)*100)
+
+
+
+
+
+
+  select(-Jugados) %>%
+  arrange(desc(Ganados)) %>% 
+  pivot_longer(
+    cols = c(Ganados, Perdidos)
+    ,names_to = "GP"
+    ,values_to = "Percent"
+  ) %>% 
+  mutate(GP = factor(GP))
+
+glimpse(df_score)
+
+# set fonts
+font_add_google("Staatliches","sta")
+font_add_google("Raleway","ral")
+showtext_auto()
+
+path = 'https://raw.githubusercontent.com/holtzy/R-graph-gallery/master/DATA/share-cereals.csv'
+data <- read_csv(path)
+
+
+# plot waffle char
+ggplot(df_score, aes(fill = GP, values = Percent))+
+  geom_waffle(na.rm=TRUE, n_rows=4, flip=F, size = 0.33, colour = "white")+
+  facet_wrap(~reorder(Jugador, Percent), ncol=1,strip.position = "left")+
+  coord_equal()+
+  guides(fill='none')
+  labs(
+    title="<b>Ganados porcentaje <span style='color:#f72585;'>animal feeds</span></b>",
+    caption="<b>Data</b> OWID (year 2021) <b>| Plot</b> Juan Ortiz"
+  )
+  scale_fill_manual(values=c('#f72585','#4F0325'))+
+  theme_void()+
+  theme(
+    plot.background = element_rect(fill="#222725",color=NA),
+    plot.title = element_markdown(size=60,family='sta',margin=margin(0.5,0,0.5,-0.75,'cm'),color='white'),
+    strip.text = element_markdown(hjust=0.5,size=30,family='ral',angle=90,margin=margin(0,0,0,0,'cm'),lineheight = 0.45,color='white'),
+    plot.caption = element_markdown(size=25,family='ral',margin=margin(0.5,0,0.5,-0.75,'cm'),hjust=0,color='white'),
+  )
+
+
+# plot won vs lost
+won_lost_plot <- ggplot(df_score, aes(x = Pareja, y = Jugados)) +
+  geom_segment(aes(
+    x = Jugador, xend = Jugador,
+    y = Perdidos, yend = Ganados
+  ), color = "darkgray") +
+  geom_point(aes(x = Jugador, y = Ganados), size = 8, color = "skyblue3", alpha = 0.85) +
+  geom_text(aes(x = Jugador, y = Ganados, label = Ganados), color = "white", size = 4, fontface = "bold") +
+  geom_point(aes(x = Jugador, y = Perdidos), size = 8, color = "deeppink3", alpha = 0.85) +
+  geom_text(aes(x = Jugador, y = Perdidos, label = Perdidos), color = "white", size = 4, fontface = "bold") +
+  theme_light() +
+  coord_flip() +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    plot.title = element_text(color = "indianred3", hjust = 0.5, size = 12),
+    aspect.ratio = 0.4,
+    strip.background = element_rect(
+      colour = "gray",
+      fill = "skyblue3"
+    ),
+    strip.text = element_text(size = 14, face = "bold", family = "Ubuntu", color = "white")
+  ) +
+  labs(x = "", y = "", title = "") +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "darkgray")
+
+
+print(won_lost_plot)
+
+
+
+
+
+
+# create bar plot
+ganados_bar <- ggplot(jugador_tabla, aes(x = Ganados_perc, y = reorder(Jugador, Ganados_perc))) +
+  geom_bar(stat = "identity", fill = "skyblue3", width = 0.6, alpha = 0.8) +
+  geom_pointrange( aes(xmin=Ganados_perc-CE, xmax=Ganados_perc+CE, y=Jugador), colour="orange", alpha=0.7, size=0.8) +
+  geom_text(aes(label = paste0(round(Ganados_perc * 100, 0), "%"))
+            ,vjust = -0.3
+            ,hjust = -0.3
+            ,color = "skyblue4"
+            ,fontface = "bold") +
+  scale_x_continuous(limits = c(0, 0.8)) +
+  geom_vline(xintercept = 0.5, linetype = "dashed", color = "darkgray") +
+  annotate("text", x = 0.5, y = length(jugador_tabla$Jugador) + 0.5, label = "50%", color = "darkgray", fontface = "bold") +
+  labs(title = "Ganados %",
+       x = "",
+       y = "") +
+  theme_minimal() +
+  theme(
+    panel.grid.major = element_blank()
+    ,panel.grid.minor = element_blank()
+    ,plot.title = element_text(face = "bold", color = "indianred3")
+    ,axis.text.x = element_blank()
+    ,axis.text.y = element_text(size = 12, color = "skyblue4", face = "bold")
+  )
+
+print(ganados_bar)
+
+
+
+
+
+############################
+## Analisis de tendencia  ##
+############################
+# Create a line chart
+trend <- ggplot(data, aes(x = Partida, y = Total, color = Jugador, group = Jugador)) +
+  geom_step(linewidth = 1, alpha = 0.7) +
+  scale_color_brewer(palette = "Set1") +
+  labs(
+    title = "Ficha de Invierno 2024 - Rendimiento Acumulado",
+    x = "Partida",
+    y = "Rendimiento",
+    color = "Jugador"
+  ) +
+  theme_minimal() +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    plot.title = element_text(face = "bold", color = "indianred3")
+  ) +
+  geom_text(aes(label = ifelse(Partida == max(Partida), as.character(Total), "")),
+    hjust = 0.05, vjust = 1.5, size = 4
+  ) +
+  geom_hline(yintercept = 0, linetype = "dashed")
+
+print(trend)
+
+
+###################################
+## Saldo por partida y jugador   ##
+## Violin plot distribution cool ##
+###################################
+# Plot saldo de puntos por partida
+box_data <- read_csv("./data/ficha_datos_box.csv")
+
+# Convert Fecha to date format
+box_data$Fecha <- as.Date(box_data$Fecha, format = "%m/%d/%Y")
+
+# add factors
+box_data$Jugador <- factor(box_data$Jugador)
+
+# Get median values
+median_values <- aggregate(Saldo ~ Jugador, data = box_data, FUN = median)
+
+# Filter the data to include only values greater than 10 or lower than -10
+filtered_data <- box_data[abs(box_data$Saldo) > 10, ]
+
+# Create the boxplot
+box <- ggplot(box_data, aes(x = Jugador, y = Saldo, color = Jugador)) +
+  #  geom_boxplot(width=0.4, color="grey", alpha=0.1) +
+  geom_violin(width = 0.8, linewidth = 0.2, alpha = 0.6) +
+  scale_color_brewer(palette = "Set1") +
+  labs(
+    title = "Saldo por jugador y partida 2024 - 2025",
+    y = "Saldo de partida",
+    x = "",
+    color = "Jugador"
+  ) +
+  #  geom_point(alpha = 0.7, size = 3, position = position_jitter(width = 0.2)) +
+  geom_jitter(size = 2.2, width = 0.2, alpha = 0.75) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray") +
+  stat_summary(fun.y = median, geom = "point", shape = 23, size = 3) +
+  ylim(-25, 25) +
+  #  coord_flip() + # This switch X and Y axis and allows to get the horizontal version
+  theme_minimal() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.major.x = element_blank(),
+    plot.title = element_text(face = "bold", color = "indianred3"),
+    axis.text.x = element_text(size = 12, color = "darkgray", face = "bold"),
+    axis.text.y = element_text(size = 12, color = "darkgray", face = "bold")
+  ) +
+  geom_text(
+    data = filtered_data, aes(x = Jugador, y = Saldo, label = Saldo),
+    size = 3, nudge_y = 1, fontface = "bold"
+  )
+
+print(box)
+
+##############################
+## Zapatazos as % of juegos ##
+##############################
+# summary by marca
+marca_table <- data %>%
+  filter(Ganados == 1) %>% 
+  group_by(Jugador, Marca) %>%
+  summarize(Total_Juegos = sum(Jugados, na.rm = TRUE), .groups = 'drop') %>%
+  group_by(Jugador) %>%
+  mutate(Total_Juegos_Pct = Total_Juegos / sum(Total_Juegos) * 100) %>% 
+  ungroup()
+  
+# Print the summary table
+print(marca_table %>% filter(Marca == "sencillo") %>% arrange(desc(Total_Juegos_Pct)))
+
+# reorder factor
+marca_table$Jugadorx <- factor(marca_table$Jugador, ordered = TRUE, levels = c("Rober", "Kilo", "Jerry", "Jorge", "Piztache"))
+
+# show table
+zapato <- ggplot(marca_table, aes(x = Jugadorx, y = Total_Juegos_Pct, fill = Marca)) +
+  geom_bar(stat = "identity") +
+  scale_y_continuous(labels = scales::percent) +
+  geom_text(aes(label = scales::percent(Total_Juegos_Pct / 100, accuracy = 1)),
+            position = position_stack(vjust = 0.5), size = 5, fontface = "bold", color = "darkgray") +
+  coord_flip() +
+  labs(title = "Distribution of Total Juegos Percentage by Jugador and Marca",
+       x = "Jugador",
+       y = "Percentage of Total Juegos") +
+  theme_minimal()
+
+print(zapato)
+
+
+library(dplyr)
+library(distributional)
+
+theme_set(theme_ggdist())
+
+set.seed(1234)
+df = data.frame(
+  group = c("a", "b", "c"),
+  value = rnorm(1500, mean = c(5, 7, 9), sd = c(1, 1.5, 1))
+)
+df %>%
+  ggplot(aes(x = value, y = group)) +
+  stat_halfeye()
+
+
+###################################
+## Saldo por partida y jugador   ##
+## Violin plot distribution cool ##
+###################################
+# Plot saldo de puntos por partida
+box_data <- read_csv("ficha_datos_box.csv")
+
+# Convert Fecha to date format
+box_data$Fecha <- as.Date(box_data$Fecha, format = "%m/%d/%Y")
+
+# Get median values
+median_values <- aggregate(Saldo ~ Jugador, data = box_data, FUN = median)
+
+# Filter the data to include only values greater than 10 or lower than -10
+filtered_data <- box_data[abs(box_data$Saldo) > 10, ]
+
+# Create the boxplot
+ggplot(box_data, aes(x = Jugador, y = Saldo, color = Jugador)) +
+  #  geom_boxplot(width=0.4, color="grey", alpha=0.1) +
+  geom_violin(width = 0.8, linewidth = 0.2, alpha = 0.6) +
+  scale_color_brewer(palette = "Set1") +
+  labs(
+    title = "Saldo por jugador y partida - 2024",
+    y = "Saldo de partida",
+    x = "",
+    color = "Jugador"
+  ) +
+  #  geom_point(alpha = 0.7, size = 3, position = position_jitter(width = 0.2)) +
+  geom_jitter(size = 2.2, width = 0.2, alpha = 0.75) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray") +
+  stat_summary(fun.y = median, geom = "point", shape = 23, size = 3) +
+  ylim(-25, 25) +
+  #  coord_flip() + # This switch X and Y axis and allows to get the horizontal version
+  theme_minimal() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.major.x = element_blank(),
+    plot.title = element_text(face = "bold", color = "darkred"),
+    axis.text.x = element_text(size = 12, color = "darkgray", face = "bold"),
+    axis.text.y = element_text(size = 12, color = "darkgray", face = "bold")
+  ) +
+  geom_text(
+    data = filtered_data, aes(x = Jugador, y = Saldo, label = Saldo),
+    size = 3, nudge_y = 1, fontface = "bold"
+  )
+# geom_text(data = median_values, aes(x = Jugador, y = Saldo, label = round(Saldo, 2)),
+# fontface = "bold", size = 4)
+
+
+
+
+###########################
+## Tendencia por jugador ##
+###########################
+
+# Load the dataset
+data <- read_csv("ficha_datos_trend.csv")
+
+# Convert Fecha to date format
+data$Fecha <- as.Date(data$Fecha, format = "%m/%d/%Y")
+
+# Create a line chart
+ggplot(data, aes(x = Partida, y = Total, color = Jugador, group = Jugador)) +
+  geom_step(linewidth = 1, alpha = 0.7) +
+  scale_color_brewer(palette = "Set1") +
+  labs(
+    title = "Ficha de Otoño 2024 - Rendimiento Acumulado",
+    x = "Partida",
+    y = "Rendimiento",
+    color = "Jugador"
+  ) +
+  theme_minimal() +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    plot.title = element_text(face = "bold", color = "darkred")
+  ) +
+  geom_text(aes(label = ifelse(Partida == max(Partida), as.character(Total), "")),
+            hjust = 0.05, vjust = 1.5, size = 4
+  ) +
+  geom_hline(yintercept = 0, linetype = "dashed")
+
+
+
+
+#################################
+## Puntos por jugador y pareja ##
+## Horizontal bar chart        ##
+#################################
+# Load data
+equipo_data <- read_csv("ficha_datos_equipo.csv")
+
+# Tranform
+equipo_data <- equipo_data %>%
+  mutate(Jugador = factor(Jugador)) %>%
+  # Remove zero values
+  filter(Puntos != 0) %>%
+  # Order by Jugador and Puntos
+  arrange(Jugador, desc(Puntos))
+
+# Aggregate data
+equipo_agg <- equipo_data %>%
+  aggregate(Puntos ~ Jugador, FUN = sum) %>%
+  arrange(desc(Puntos))
+
+# Create the stacked bar chart
+ggplot(data = equipo_data, aes(x = Jugador, y = Puntos)) +
+  geom_col(aes(fill = Pareja), width = 0.7, alpha = 0.85) +
+  scale_fill_brewer(palette = "Set1") +
+  theme_minimal() +
+  # geom_text(aes(label = Puntos), position = position_stack(vjust = 0.5), color = "white") +
+  scale_x_discrete(limits = equipo_agg$Jugador) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray") +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.text.x = element_blank(),
+    plot.title = element_text(face = "bold", color = "darkred"),
+    axis.text.y = element_text(size = 12, color = "darkgray", face = "bold"),
+    aspect.ratio = 1.3 / 2.2
+  ) +
+  coord_flip() +
+  geom_text(aes(label = Puntos, group = Pareja), position = position_stack(vjust = 0.5), color = "white", fontface = "bold") +
+  labs(x = "", y = "", fill = "Pareja") +
+  ggtitle("Puntos por Jugador y Pareja")
+
+
+
+############################################
+## Puntos y Ganados por jugador y pareja  ##
+## Lollipop chart with a bit more style   ##
+############################################
+# Load data
+equipo_dot <- read_csv("ficha_datos_equipo.csv")
+
+# Transform
+equipo_dot <- equipo_dot %>%
+  mutate(Equipo = NULL) %>%
+  mutate(Neto = ifelse(Puntos > 0, "positive", "negative")) %>%
+  mutate(Neto = factor(Neto))
+
+# Select player (Kilo, Jorge, Jerry, Rober, Piztache)
+player <- "Piztache"
+
+# Stacked bar plot de puntos
+p1 <- equipo_dot %>%
+  filter(Jugador == player) %>%
+  arrange(Puntos) %>%
+  mutate(Pareja = factor(Pareja, unique(Pareja))) %>%
+  ggplot() +
+  aes(x = Pareja, y = Puntos) +
+  geom_segment(aes(
+    x = Pareja, xend = Pareja,
+    y = 0, yend = Puntos, color = Neto
+  ), linewidth = 1.3, alpha = 0.8) +
+  geom_point(aes(x = Pareja, y = Puntos, color = Neto), size = 8) +
+  geom_text(aes(x = Pareja, y = Puntos, label = Puntos), color = "white", size = 4, fontface = "bold") +
+  theme_light() +
+  ylim(-15, 15) +
+  coord_flip() +
+  theme(
+    legend.position = "none",
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text.x = element_blank(),
+    axis.text.y = element_text(size = 12, color = "gray40", face = "bold.italic", family = "Ubuntu Mono"),
+    plot.title = element_text(color = "indianred3", hjust = 0.5, size = 12),
+    aspect.ratio = 0.4,
+    strip.text = element_text(size = 14, face = "bold")
+  ) +
+  labs(x = "", y = "", title = "") +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "darkgray")
+
+# Lollipop chart of Puntos
+p2 <- equipo_dot %>%
+  filter(Jugador == player) %>%
+  arrange(Puntos) %>%
+  mutate(Pareja = factor(Pareja, unique(Pareja))) %>%
+  mutate(Perdidos = Jugados - Ganados) %>%
+  ggplot() +
+  aes(x = Pareja, y = Puntos) +
+  geom_segment(aes(
+    x = Pareja, xend = Pareja,
+    y = Perdidos, yend = Ganados
+  ), color = "darkgray") +
+  geom_point(aes(x = Pareja, y = Ganados), size = 8, color = "skyblue3", alpha = 0.85) +
+  geom_text(aes(x = Pareja, y = Ganados, label = Ganados), color = "white", size = 4, fontface = "bold") +
+  geom_point(aes(x = Pareja, y = Perdidos), size = 8, color = "deeppink3", alpha = 0.85) +
+  geom_text(aes(x = Pareja, y = Perdidos, label = Perdidos), color = "white", size = 4, fontface = "bold") +
+  theme_light() +
+  ylim(0, 15) +
+  coord_flip() +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    plot.title = element_text(color = "indianred3", hjust = 0.5, size = 12),
+    aspect.ratio = 0.4,
+    strip.background = element_rect(
+      colour = "gray",
+      fill = "skyblue3"
+    ),
+    strip.text = element_text(size = 14, face = "bold", family = "Ubuntu", color = "white")
+  ) +
+  labs(x = "", y = "", title = "") +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "darkgray") +
+  facet_grid(Jugador ~ .)
+
+# Merge plots
+p1 + p2
+
+
+# final score by player
+df_score <- partida %>%
+           group_by(Jugador) %>%
+           summarize(Puntos = sum(Puntos, na.rm = TRUE)
+                     ,Jugados = sum(Jugados, na.rm = TRUE)
+                     ,Ganados = sum(Ganados, na.rm = TRUE)
+                     ,.groups = 'drop') %>%
+           mutate(Ganados_perc = round(Ganados/Jugados, 3)) %>% 
+           mutate(SE = sqrt(Ganados_perc * (1-Ganados_perc)/Jugados)) %>% 
+           mutate(CE = 1.96*SE) %>% 
+           arrange(desc(Puntos))

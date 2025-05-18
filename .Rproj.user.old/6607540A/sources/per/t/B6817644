@@ -1,0 +1,26 @@
+{
+    "id": "B6817644",
+    "path": "~/workbench/robin/ficha/R/ficha_analysis.R",
+    "project_path": "R/ficha_analysis.R",
+    "type": "r_source",
+    "hash": "3894027513",
+    "contents": "",
+    "dirty": false,
+    "created": 1743959401993.0,
+    "source_on_save": false,
+    "relative_order": 2,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "70,0",
+        "scrollLine": "45"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1744591410,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1744591410955,
+    "read_only": false,
+    "read_only_alternatives": []
+}
