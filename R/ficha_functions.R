@@ -72,7 +72,7 @@ marcador_corona <- function(dframe) {
 
 
 ###################################
-## Function: Puntos Acumulados  ##
+## Function: Ganados Porcentaje  ##
 ##################################
 puntos_acum <- function(dframe) {
   ww <- ggplot(dframe, aes(x = Jugador))
@@ -167,7 +167,7 @@ puntos_acum <- function(dframe) {
 ###################################
 ## Function: Total de Juegos    ##
 ##################################
-total_juegos <- function(dframe) {
+total_juegos <- function(dframe, tempo) {
   tdj <- ggplot(dframe, aes(x = 1
                      ,y = Jugador)
                 )
@@ -183,7 +183,7 @@ total_juegos <- function(dframe) {
          ,y = NULL
          ,title = ""
          ,subtitle = "Total de juegos"
-         ,caption = "Temporada invierno 2025")
+         ,caption = tempo)
   
   # add formatting
   tdj <- tdj + 
@@ -215,7 +215,7 @@ total_juegos <- function(dframe) {
 ##############################################
 ## Function: Tendencia de Puntos Acumulados ##
 ##############################################
-tendencia <- function(dframe) {
+tendencia <- function(dframe, tempo) {
   tt <- ggplot(dframe, aes(x = Partida
                       ,y = PuntosCum
                       ,color = Jugador)
@@ -232,7 +232,7 @@ tendencia <- function(dframe) {
       x = "Partida",
       ,y = "Puntos Acumulados"
       ,title = "Rendimiento Acumulado"
-      ,caption = "Temporada invierno 2025"
+      ,caption = tempo
     ) +
     # add labels to final score
     geom_text(aes(label = ifelse(Partida == max(Partida), as.character(PuntosCum), ""))
@@ -279,7 +279,7 @@ tendencia <- function(dframe) {
 ###############################################
 ## Function: Saldo por jugada dos temporadas ##
 ###############################################
-saldo_box <- function(dframe, doutlier) {
+saldo_box <- function(dframe, doutlier, tempo) {
   bx <- ggplot(data = dframe
                ,aes(x = Jugador
                     ,y = Saldo
@@ -306,7 +306,7 @@ saldo_box <- function(dframe, doutlier) {
       ,y = "Puntos"
       ,title = "Saldo por ficha night"
       ,subtitle = "Últimas dos temporadas"
-      ,caption = "Temporada invierno 2025")
+      ,caption = tempo)
   
   # add outliers 
   bx <- bx + geom_label_repel(data = doutlier, aes(label = Saldo)
@@ -360,7 +360,7 @@ saldo_box <- function(dframe, doutlier) {
 color_tp <- c("FALSE" = "indianred1"
               ,"TRUE" = "lightgreen")
 
-eqq_dmp <- function(dframe) {
+eqq_dmp <- function(dframe, tempo) {
   # plot crosstab of rendimiento por pareja
   eqq <- ggplot(dframe, aes(x = Jugador
                             ,y = Pareja)) +
@@ -383,7 +383,7 @@ eqq_dmp <- function(dframe) {
       ,y = NULL
       ,title = "Rendimiento por pareja"
       ,subtitle = "Total de puntos"
-      ,caption = "Temporada invierno 2025")
+      ,caption = tempo)
   
   # add formating
   eqq <- eqq + theme_minimal() +
@@ -420,7 +420,7 @@ eqq_dmp <- function(dframe) {
 color_mm <- c("#A4E0B7", "#34B8C0", "#6474B9", "#80146E")
 pal52 <- c("#001889", "#91008D", "#D24E71", "#EDA200", "#DAFF47")
 
-juegos_puntos <- function(dframe) {
+juegos_puntos <- function(dframe, tempo) {
   # plot puntos por juego
   jx <- ggplot(dframe, aes(
     x = Fecha
@@ -444,7 +444,7 @@ juegos_puntos <- function(dframe) {
       y = "Puntos",
       title = "Rosita y mas allá",
       subtitle = "Puntos por juego",
-      caption = "Temporada invierno 2025"
+      caption = tempo
     ) +
     # add facets
     facet_wrap(~ Jugador

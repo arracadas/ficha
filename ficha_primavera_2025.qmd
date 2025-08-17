@@ -1,0 +1,221 @@
+---
+title: "Reporte Estadístico - Temporada Primavera 2025"
+author: "piztachz"
+toc: true
+highlight-style: pygments
+format: html
+title-block-banner: "#f0f3f5"
+title-block-banner-color: "indianred"
+editor: visual
+---
+
+
+```{r}
+#| label: load-packages
+#| include: false
+
+## Load libraries
+library(tidyverse)
+library(patchwork)
+library(showtext)
+library(waffle)
+library(ggtext)
+library(colorspace)
+library(RColorBrewer)
+# par(mar=c(3,4,2,2))
+# display.brewer.all()
+library(ggthemes)
+library(scales)    # For percent formatting
+library(forcats)   # For reordering factor levels
+library(paletteer) # Color palettes
+library(ggrepel)
+library(lubridate)
+
+## Load fonts
+## Loading Google fonts (https://fonts.google.com/)
+font_add_google("Love Ya Like A Sister", "sister")  # text and title
+font_add_google("Shadows Into Light Two", "siltwo")
+font_add_google("Gloria Hallelujah", "gloria")  # labels
+font_add_google("Englebert", "engle")  # labels
+
+## Automatically use showtext to render text
+showtext_auto()
+
+# temporada
+tempo <- "Temporada primavera 2025"
+
+## Load functions
+source("./R/ficha_functions.R")
+
+## Load data
+path = "./data/20252_spring/"
+partida <- readRDS(paste0(path, "ficha_trend_clean.rds"))  # detail of partida
+corona <- readRDS(paste0(path, "ficha_corona.rds"))       # aggregate data with total de puntos
+box_data <- readRDS(paste0(path, "ficha_box_clean.rds"))  # aggregate data for jugada i.e. ficha night
+equipo <- readRDS(paste0(path, "ficha_equipo.rds"))   # aggregate data for desempeño de equipo
+
+## Transform data
+# order levels from lowest to highest score
+jugadorx <- c("Piztache", "Jerry", "Rober", "Kilo", "Jorge") 
+
+# add factor
+partida_df <- partida %>% 
+  mutate(Jugador = factor(Jugador, levels = jugadorx )) %>% 
+  mutate(JugadaMes = month(Fecha, label = TRUE))
+
+# add factor
+corona_df <- corona %>% 
+  mutate(Jugador = factor(Jugador, levels = jugadorx))
+
+# add factor
+box_df <- box_data %>%
+  mutate(Jugador = factor(Jugador, levels = jugadorx))
+
+```
+
+## La Ficha
+Dominó, el juego mágico de fichas que nos transporta a un mundo de estrategia y números! Entre amigos el dominó es ley, con cervezas, risas y algún que otro **¡zapatazo!**. ![](assets/fichas_mesa.png){style="float:left; margin-right: 20px; margin-top: 10px;" fig-alt="Juego de dominó" height="140"}  
+La ficha no perdona, compa: aquí se requiere maña, memoria de elefante y un toque de suerte para no salir atorado. Algunos juegan bien formalitos, con las tres R sagradas: respeta la mano, repite la ficha y refunde al de al lado… ¡pero otros simplemente les vale madres! y buscan la gloria eterna aunque acaben errabundos en el valle de las sombras".
+
+
+
+## Campeón de la temporada
+
+![](assets/oso_pg.JPG){style="float:right; margin-left: 20px; margin-bottom: 10px;" fig-alt="Bulldozer poster de cine" width="225"}
+
+**¡Esta temporada estuvo *de infarto*, señores!** La penúltima noche nos dejó con el torneo *a medias* y un juego pendiente **de triple puntos** que tenía a todos con los nervios de punta. Pero cuando ya nadie lo esperaba, **¡Kilate y PetaGeorge se levantaron como los *cerros Atlas del continente africano*!** y sepultaron al resto de competidores con un juego bendito de 12 puntos.
+
+Y como los grandes, **¡el *Gummy Bear* (aka PetaGiorgia, aka *Oso Mandilón*)** llegó en el último suspiro, *raspando uñas* y con un *golpe sagrado* que afirmó su dominio de ficha para amarrar el triunfo! 🏆🔥💪
+
+*(Y cabe mencionar que Piztachx quedó barriendo el sotáno con un puntaje total acumulado de -34!)* 😏🍿
+
+## Marcador Corona
+
+![](assets/corona_extra){style="float:left; margin-right: 20px; margin-bottom: 10px;" fig-alt="La cerveza es Corona" height="100"}
+**¡Vaya temporada de *locura*, compadres!** Todo se definió en un **juego final *a cuchillo*** de **12 puntos** —*12 navajazos* en el corazón de **Jerry y Piztache**, que sepultó cualquier esperanza de vida.
+
+**El Oso**, que empezó la temporada *más perdido que turista en las calles del Centro*, aguantó vara y como los osos de Alaska, persistión en la búsqueda del salmón 🐻🐟 , escalando posiciones como si nada, hasta llegar a la cima. Mientras, **Piztache** hizo lo contrario: arrancó *como cohete en Año Nuevo*… pero se quedó sin gasolina y terminó *en el sótanito* de la tabla, *raspando lona*.
+
+Y **Rober**, el *favorito de la casa*, iba *volando* hacia su segundo título… **¡hasta que las dos últimas noches le jugaron *chueco*!** Su ausencia lo mandó del primer lugar al **tercer escalón del podio**. *(Moraleja: en el dominó, como en el amor, *no falte a la cita*, carnal… o te bailan*!)* 😅🏆
+
+**¡Así es el juego, mi gente!** Unos suben, otros bajan, y al final **solo queda el que aguanta la presión… y la *desvelada*.** 🍻✨
+
+
+
+```{r, fig.width=8, fig.height=3, fig.align='center'}
+#| echo: false
+#| warning: false
+#| message: false
+#| column: page-right
+#| 
+
+################################
+## Summary of the season      ##
+## Marcador Corona            ##
+################################
+# plot heatmap of marcador corona
+rk <- marcador_corona(corona_df)
+
+# Ganados en porcentaje
+ww <- puntos_acum(partida_df)
+
+# Total de juegos
+tdj <- total_juegos(corona_df, tempo)
+print(rk + ww + tdj)
+```
+
+```{r, fig.width=8, fig.height=5, fig.align='center'}
+#| echo: false
+#| warning: false
+#| message: false
+#| column: page-right
+################################
+## Tendencia por juego        ##
+################################
+tt <- tendencia(partida_df, tempo)
+
+# create subset of data for each player to later add labels
+jugpar1 <- partida_df %>% 
+  select(Fecha, Jugador, Partida, PuntosCum) %>% 
+  filter(Jugador %in% c("Kilo", "Rober", "Jorge") & Partida == 58)
+
+jugpar2 <- partida_df %>% 
+  select(Fecha, Jugador, Partida, PuntosCum) %>% 
+  filter(Jugador %in% c("Jerry", "Piztache") & Partida == 52)
+
+jugpar_merged <- bind_rows(jugpar1, jugpar2)
+
+# add labels
+tt <- tt +
+  geom_label(data = jugpar_merged, aes(label = Jugador)
+             ,family = "engle"
+             ,size = 6
+             ) +
+  geom_hline(yintercept = c(-30, 30), linetype = "dotted", color = "gray")
+
+print(tt)
+```
+
+## Rendimiento por pareja
+
+**¡La pareja *más en llamas* de la temporada?** **¡Kilata y PG!,** *la dupla dinámica* que le dio *atole con el dedo* a todos. De cerca les pisaban los talones **Kilate y Rober**, que no se rajaron y mantuvieron el ritmo *como metronomos con *cheve* en mano*.
+
+Pero si hablamos de **el *hoyo negro* de la temporada**, **¡Jerry y Piztache se llevan el premio!** Con un *puntaje acumulado de -20*, quedaron *más abajo que los sueldos en diciembre*…  😱 
+
+*(Moraleja: en el dominó, si no estás *pa’ arriba*, estás *pa’ bajo*… ¡y estos últimos *pa’ muy abajo*!)* 🏆💥  
+
+```{r, fig.width=7, fig.height=5, fig.align='center'}
+#| echo: false
+#| warning: false
+#| message: false
+###################################
+## Saldo por pareja              ##
+## Crosstab                      ##
+###################################
+# plot table
+eqq <- eqq_dmp(equipo, tempo)  
+print(eqq)
+```
+
+
+```{r, fig.width=8, fig.height=4, fig.align='center'}
+#| echo: false
+#| warning: false
+#| message: false
+
+###################################
+## Saldo por partida y jugador   ##
+## Violin plot distribution cool ##
+###################################
+# get median values
+median_values <- aggregate(Saldo ~ Jugador, data = box_df, FUN = median)
+
+# filter outliers
+box_outliers <- box_df %>% 
+  filter(abs(Saldo) > 10)
+
+# create plot
+bx <- saldo_box(box_df, box_outliers, tempo)
+print(bx)
+
+```
+
+## El Rosita y más allá
+
+El juego más grosero de la temporada fue ese juego final de 12 puntos, donde Jerry y Piztachx calleron como Caín y Abel en el último momento.  Fue doloroso, con una llaga de aquellas, que solo curan los shamanes de Comitán, Chiapas.
+
+
+```{r, fig.width=8, fig.height=5, fig.align='center'}
+#| echo: false
+#| warning: false
+#| message: false
+####################################
+## Puntos por juego y ficha night ##
+## plot chart                     ##
+####################################
+# plot juegos
+jj <- juegos_puntos(partida_df, tempo)
+print(jj)
+```
+
+

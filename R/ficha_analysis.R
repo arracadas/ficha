@@ -33,18 +33,22 @@ font_add_google("Englebert", "engle")  # labels
 ## Automatically use showtext to render text
 showtext_auto()
 
+# temporada
+tempo <- "Temporada primavera 2025"
+
 ## Load functions
-source("./R/functions.R")
+source("./R/ficha_functions.R")
 
 ## Load data
-partida <- readRDS("./data/20244_winter/ficha_trend_clean.rds")  # detail of partida
-corona <- readRDS("./data/20244_winter/ficha_corona.rds")       # aggregate data with total de puntos
-box_data <- readRDS("./data/20244_winter/ficha_box_clean.rds")  # aggregate data for jugada i.e. ficha night
-equipo <- readRDS("./data/20244_winter/ficha_equipo.rds")   # aggregate data for desempeño de equipo
+path = "./data/20252_spring/"
+partida <- readRDS(paste0(path, "ficha_trend_clean.rds"))  # detail of partida
+corona <- readRDS(paste0(path, "ficha_corona.rds"))       # aggregate data with total de puntos
+box_data <- readRDS(paste0(path, "ficha_box_clean.rds"))  # aggregate data for jugada i.e. ficha night
+equipo <- readRDS(paste0(path, "ficha_equipo.rds"))   # aggregate data for desempeño de equipo
 
 ## Transform data
-# orden levels
-jugadorx <- c("Jorge", "Piztache", "Rober", "Kilo", "Jerry") 
+# order levels from lowest to highest score
+jugadorx <- c("Piztache", "Jerry", "Rober", "Kilo", "Jorge") 
 
 # add factor
 partida_df <- partida %>% 
@@ -57,7 +61,7 @@ corona_df <- corona %>%
 
 # add factor
 box_df <- box_data %>%
-  filter(Temporada %in% c("Fall 2024", "Winter 2025")) %>% 
+  filter(Temporada %in% c("Winter 2025", "Spring 2025")) %>% 
   mutate(Jugador = factor(Jugador, levels = jugadorx))
 
 
@@ -73,23 +77,23 @@ rk <- marcador_corona(corona_df)
 ww <- puntos_acum(partida_df)
 
 # Total de juegos
-tdj <- total_juegos(corona_df)
+tdj <- total_juegos(corona_df, tempo)
 print(rk + ww + tdj)
 
 
 ################################
 ## Tendencia por juego        ##
 ################################
-tt <- tendencia(partida_df)
+tt <- tendencia(partida_df, tempo)
 
 # create subset of data for each player to later add labels
 jugpar1 <- partida_df %>% 
   select(Fecha, Jugador, Partida, PuntosCum) %>% 
-  filter(Jugador %in% c("Kilo", "Rober", "Jorge") & Partida == 112)
+  filter(Jugador %in% c("Kilo", "Rober", "Jorge") & Partida == 58)
 
 jugpar2 <- partida_df %>% 
   select(Fecha, Jugador, Partida, PuntosCum) %>% 
-  filter(Jugador %in% c("Jerry", "Piztache") & Partida == 102)
+  filter(Jugador %in% c("Jerry", "Piztache") & Partida == 52)
 
 jugpar_merged <- bind_rows(jugpar1, jugpar2)
 
@@ -116,7 +120,7 @@ box_outliers <- box_df %>%
   filter(abs(Saldo) > 10)
 
 # create plot
-bx <- saldo_box(box_df, box_outliers)
+bx <- saldo_box(box_df, box_outliers, tempo)
 print(bx)
 
 
@@ -125,7 +129,7 @@ print(bx)
 ## Crosstab                      ##
 ###################################
 # plot table
-eqq <- eqq_dmp(equipo)  
+eqq <- eqq_dmp(equipo, tempo)  
 print(eqq)
   
 
@@ -134,6 +138,6 @@ print(eqq)
 ## plot chart                     ##
 ####################################
 # plot juegos
-jj <- juegos_puntos(partida_df)
+jj <- juegos_puntos(partida_df, tempo)
 print(jj)
 

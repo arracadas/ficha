@@ -16,9 +16,11 @@ library(patchwork)
 ## Load and clean raw data         ##
 ## Data set: ficha datos trend     ##
 #####################################
+# define season's path
+path <- "./data/20252_spring/"
 
 # load trend data
-partida <- read_csv("./data/20244_winter/ficha_datos_trend.csv")
+partida <- read_csv(paste0(path, "ficha_datos_trend.csv"))
 
 # transform datatypes
 partida <- partida %>% 
@@ -63,7 +65,7 @@ partida <- partida %>%
 glimpse(partida)
 
 # save file
-saveRDS(partida, file = "./data/20244_winter/ficha_trend_clean.rds")
+saveRDS(partida, file = paste0(path,"ficha_trend_clean.rds"))
 
 
 #####################################
@@ -72,7 +74,7 @@ saveRDS(partida, file = "./data/20244_winter/ficha_trend_clean.rds")
 #####################################
 
 # load scores by match game
-box_data <- read_csv("./data/20244_winter/ficha_datos_box.csv")
+box_data <- read_csv(paste0(path,"ficha_datos_box.csv"))
 
 # transform datatypes
 box_data <- box_data %>% 
@@ -82,7 +84,7 @@ box_data <- box_data %>%
 glimpse(box_data)
 
 # save file
-saveRDS(box_data, file = "./data/20244_winter/ficha_box_clean.rds")
+saveRDS(box_data, file = paste0(path,"ficha_box_clean.rds"))
 
 
 ###############################
@@ -103,7 +105,7 @@ corona <- partida %>%
   mutate(CE = 1.96*SE)
 
 # save file
-saveRDS(corona, file = "./data/20244_winter/ficha_corona.rds")
+saveRDS(corona, file = paste0(path,"ficha_corona.rds"))
 
 
 
@@ -122,5 +124,5 @@ equipo <- partida %>%
   ungroup()
 
 # save file
-saveRDS(equipo, file = "./data/20244_winter/ficha_equipo.rds")
+saveRDS(equipo, file = paste0(path,"ficha_equipo.rds"))
 
