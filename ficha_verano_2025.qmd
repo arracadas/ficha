@@ -84,7 +84,7 @@ Luis Del Toro. Breve Introducción a los Fundamentos de la Teoría de Juegos : L
 
 ## Campeón de la temporada
 
-![](assets/oso_celta.jpg){fig-alt="Oso vikingo" style="float:right; margin-left: 20px; margin-bottom: 10px;" width="206"}
+![](assets/oso_celta.jpg){fig-alt="Oso vikingo" style="float:right; margin-left: 20px; margin-bottom: 10px;" width="231"}
 
 ¡Ah, qué pedazo de temporada nos dejó el Verano 2025 en la CDMX, compadres! Resulta que el **Oso Celta** —aka **PetaGeorgio**, aka **Gummy Bear**— se plantó en la cancha de dominó como si fuera **Thor con resaca**, pero en vez de martillo, traía fichas y una actitud de *"aquí mando yo, y si no les gusta, aguantense"*.
 
@@ -94,7 +94,7 @@ Y así, sin chistar, el Master de las Fichas hizo lo suyo: **se coronó por segu
 
 ## Marcador Corona
 
-![](assets/banda_ficha_hell.jpg){width="359"}
+![](assets/banda_ficha_hell.jpg){width="420"}
 
 **Un temporada más, una divertida noche de viernes, un rompecabezas más que ganar! Así cerramos la temporada del verano de 2025.** 😅🏆 Aquí tenemos a los luchadores desde su última partida en el inframundo!🍻✨
 
@@ -119,6 +119,8 @@ ww <- puntos_acum(partida_df)
 tdj <- total_juegos(corona_df, tempo)
 print(rk + ww + tdj)
 ```
+
+## Tendencia por Jugador
 
 ```{r, fig.width=8, fig.height=5, fig.align='center'}
 #| echo: false
@@ -154,7 +156,7 @@ print(tt)
 
 ## Rendimiento por pareja
 
-Jerry Caimán in Piztach Arrakadas se disparan como la pareja más filosa de la temporada!
+¡**Jerry Caimán 🐊⚡ y Piztach Arrakadas 🌟🦜** se disparan como **la pareja más filosa de la temporada**! 🔪🎯 ¡**Aguas, que estos dos no perdonan ni en Navidad!** 🎄💥 #DinamitaPura #DominóDeInfarto
 
 ```{r, fig.width=7, fig.height=5, fig.align='center'}
 #| echo: false
@@ -171,7 +173,7 @@ print(eqq)
 
 ## Saldo de Viernes por Jugador
 
-¡**Jerry y Kilate, la dinámita pura!** 💥 Los rudos más rudos de la temporada con noches de más de diez puntos! repartiendo cachetadas con guante de oro!
+¡**Jerry Caimán y Kilate Mandalorian, la dinámita pura!** 💥 Los rudos más rudos de la temporada con noches de más de diez puntos! repartiendo cachetadas con guante de oro!
 
 ```{r, fig.width=8, fig.height=4, fig.align='center'}
 #| echo: false
@@ -196,8 +198,6 @@ print(bx)
 ```
 
 ## El Rosita y más allá
-
-Aquí el puntaje de cada juego y una que otra paliza!.
 
 ```{r, fig.width=8, fig.height=5, fig.align='center'}
 #| echo: false
