@@ -173,7 +173,7 @@ print(eqq)
 
 ## Saldo de Viernes por Jugador
 
-¡**Jerry Caimán y Kilate Mandalorian, la dinámita pura!** 💥 Los rudos más rudos de la temporada con noches de más de diez puntos! repartiendo cachetadas con guante de oro!
+¡**Kilate Mandalorian y Oso Petatero, la dinámita pura!** 💥 Los rudos más rudos de la temporada con noches de más de diez puntos! repartiendo cachetadas con guante de oro!
 
 ```{r, fig.width=8, fig.height=4, fig.align='center'}
 #| echo: false
