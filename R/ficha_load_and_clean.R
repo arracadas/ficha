@@ -1,8 +1,8 @@
 ##########################################
 ## Ficha Night Domino                   ##
 ## Summary of statistics for the season ##
-## Last season:  Winter 2024            ##
-## April 2025, jortega                  ##
+## Last season:  Fall 2025              ##
+## December 2025, jortega               ##
 ##                                      ##
 ##########################################
 
@@ -17,7 +17,7 @@ library(patchwork)
 ## Data set: ficha datos trend     ##
 #####################################
 # define season's path
-path <- "./data/20253_summer/"
+path <- "./data/20254_fall/"
 
 # load trend data
 partida <- read_csv(paste0(path, "ficha_datos_trend.csv"))

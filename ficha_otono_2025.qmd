@@ -1,0 +1,221 @@
+---
+title: "Reporte Estadístico - Temporada Otoño 2025"
+author: "piztachz"
+toc: true
+highlight-style: pygments
+format: html
+title-block-banner: "#f0f3f5"
+title-block-banner-color: "indianred"
+editor: visual
+---
+
+```{r}
+#| label: load-packages
+#| include: false
+
+## Load libraries
+library(tidyverse)
+library(patchwork)
+library(showtext)
+library(waffle)
+library(ggtext)
+library(colorspace)
+library(RColorBrewer)
+# par(mar=c(3,4,2,2))
+# display.brewer.all()
+library(ggthemes)
+library(scales)    # For percent formatting
+library(forcats)   # For reordering factor levels
+library(paletteer) # Color palettes
+library(ggrepel)
+library(lubridate)
+
+## Load fonts
+## Loading Google fonts (https://fonts.google.com/)
+font_add_google("Love Ya Like A Sister", "sister")  # text and title
+font_add_google("Shadows Into Light Two", "siltwo")
+font_add_google("Gloria Hallelujah", "gloria")  # labels
+font_add_google("Englebert", "engle")  # labels
+
+## Automatically use showtext to render text
+showtext_auto()
+
+# temporada
+tempo <- "Temporada otoño 2025"
+
+## Load functions
+source("./R/ficha_functions.R")
+
+## Load data
+path = "./data/20254_fall/"
+partida <- readRDS(paste0(path, "ficha_trend_clean.rds"))  # detail of partida
+corona <- readRDS(paste0(path, "ficha_corona.rds"))       # aggregate data with total de puntos
+box_data <- readRDS(paste0(path, "ficha_box_clean.rds"))  # aggregate data for jugada i.e. ficha night
+equipo <- readRDS(paste0(path, "ficha_equipo.rds"))   # aggregate data for desempeño de equipo
+
+## Transform data
+# order levels from lowest to highest score
+jugadorx <- c("Jorge", "Kilo", "Rober", "Jerry", "Piztache")
+
+# add factor
+partida_df <- partida %>% 
+  mutate(Jugador = factor(Jugador, levels = jugadorx )) %>% 
+  mutate(JugadaMes = month(Fecha, label = TRUE))
+
+# add factor
+corona_df <- corona %>% 
+  mutate(Jugador = factor(Jugador, levels = jugadorx))
+
+# add factor
+box_df <- box_data %>%
+  filter(Temporada %in% c("Summer 2025", "Fall 2025")) %>% 
+  mutate(Jugador = factor(Jugador, levels = jugadorx))
+
+```
+
+## La Ficha
+
+Imagina una noche de risas, miradas cómplices y **fichas que caen como estrategias de guerra**. El dominó en pareja no es solo un juego, **es un duelo de ingenio, memoria y conexión pura**. Cada partida es una **sinfonía de cálculos, señales secretas y momentos épicos** que convierten una simple mesa en un campo de batalla amigable.
+
+![](assets/fichas_mesa.png){style="float:left; margin-right: 20px; margin-top: 10px;" fig-alt="Juego de dominó" height="140"}Aquí no gana el que tiene suerte, **gana el que piensa dos jugadas adelante**. El dominó es como el ajedrez, pero con más emoción, menos reglas y el doble de travesura. Suma, resta, deduce… ¡El dominó es el único juego donde las matemáticas son divertidas! Si llevas la cuenta de qué números ya salieron y cuáles faltan, podrás predecir los movimientos del rival como un adivino.
+
+¿Por Qué Jugar Dominó en Pareja?
+
+Reúne a tus amigos (y prepárate para risas, gritos y algunos reclamos amigables). Ejercita tu mente mientras te diviertes (¡adiós, aburrimiento!). Crea recuerdos que durarán más que la partida. Descubre quién es el verdadero estratega del grupo
+
+## "El Jinete de las Fichas: La Leyenda del Arrakadas"
+
+![](assets/arrakadas_hell.jpg){fig-alt="Arrakadas" style="float:right; margin-left: 20px; margin-bottom: 10px;" width="231"}
+
+Bajo la luna llena, como un susurro de leyenda que se desliza entre la bruma, **el Piztach —el Arrakadas—** emergió de las sombras.
+
+Montado no sobre un corcel, sino sobre el **eco de su propia historia**, cruzó valles y lomas, pueblos dormidos y caminos polvorientos. A su lado, fiel como la memoria, **un perro rastrea los surcos de la tierra**, mientras él avanza con la **calma de quien sabe que el tiempo, al fin, le ha hecho justicia**.
+
+Viste **chamarra de vaquero, tejana negra y pantalón de cuero**, no como armadura, sino como **testimonio de un juramento antiguo**. Sus patillas enmarcan un rostro sereno, pero sus ojos… **¡esa mirada!** Guardan el fuego de una promesa sagrada, **el mismo que ardió aquel día en la loma**, cuando la traición segó la vida de quien le dio nombre 🏆🔥
+
+## Marcador Corona
+
+Aquí las frases más memorables **con emojis y toda la onda** para darle más sabor a la temporada:
+
+-   **Kilo u Oso?: ¿por qué la cajetea, compa?** 🤨🎲💥
+
+-   **Oso: No salió, compadre** 😅🐻🤷‍♂️
+
+-   **Tostito Power!** 🌟💪🌮
+
+-   **Nada mal la cosecha** 🌾💰😎
+
+-   **Chale, qué agresividad…** 😱🔥😤
+
+-   **Pudimos haber avanzado más** 🏃‍♂️💨😩
+
+-   **Rober: "Ora por chingar, no la cago"** 😂🎯🤏
+
+-   **Jerry Caimán: "Algo estoy haciendo mal…"** 🤔🐊😅
+
+-   **Jerry Caimán: "Estoy apendehuevitizado"** 🥚😵‍💫🤡 *(traducción: "No estoy apto para jugar dominó…")*
+
+-   **Rober: "El algoritmo está más ojete que de costumbre"** 🤖💩😒
+
+```{r, fig.width=8, fig.height=3, fig.align='center'}
+#| echo: false
+#| warning: false
+#| message: false
+#| column: page-right
+#| 
+
+################################
+## Summary of the season      ##
+## Marcador Corona            ##
+################################
+# plot heatmap of marcador corona
+rk <- marcador_corona(corona_df)
+
+# Ganados en porcentaje
+ww <- puntos_acum(partida_df)
+
+# Total de juegos
+tdj <- total_juegos(corona_df, tempo)
+print(rk + ww + tdj)
+```
+
+## Tendencia por Jugador
+
+```{r, fig.width=8, fig.height=5, fig.align='center'}
+#| echo: false
+#| warning: false
+#| message: false
+#| column: page-right
+################################
+## Tendencia por juego        ##
+################################
+tt <- tendencia(partida_df, tempo)
+
+# create subset of data for each player to later add labels
+jugpar1 <- partida_df %>% 
+  select(Fecha, Jugador, Partida, PuntosCum) %>% 
+  filter(Jugador %in% c("Kilo", "Rober", "Jorge") & Partida == 58)
+
+jugpar2 <- partida_df %>% 
+  select(Fecha, Jugador, Partida, PuntosCum) %>% 
+  filter(Jugador %in% c("Jerry", "Piztache") & Partida == 52)
+
+jugpar_merged <- bind_rows(jugpar1, jugpar2)
+
+# add labels
+tt <- tt +
+  geom_label(data = jugpar_merged, aes(label = Jugador)
+             ,family = "engle"
+             ,size = 6
+             ) +
+  geom_hline(yintercept = c(-30, 30), linetype = "dotted", color = "gray")
+
+print(tt)
+```
+
+## Rendimiento por pareja
+
+Nuevamente... **Jerry Caimán 🐊⚡ y Piztach Arrakadas 🌟🦜 dominan como** **la pareja más filosa de la temporada**! 🔪🎯 ¡**Aguas, que estos dos no perdonan ni en Navidad!** 🎄💥 #DinamitaPura #DominóDeInfarto
+
+¡**Kilate Mandalorian 🛡️⚔️ y Jorge Oso Petatero 🐻💥** terminaron la temporada **más golpeados que armadura en una batalla de asteroides!** 🌠💢
+
+Tras un **inframnudo x4** (sí, **¡x4!** 😱), la derrota de **-9 puntos** a manos de **la Pareja Dinamita** 💣🔥 les dejó **más abollados que lata de refresco en un picnic de osos**. ¡Hasta el **beskar** lloró! 😭
+
+```{r, fig.width=7, fig.height=5, fig.align='center'}
+#| echo: false
+#| warning: false
+#| message: false
+###################################
+## Saldo por pareja              ##
+## Crosstab                      ##
+###################################
+# plot table
+eqq <- eqq_dmp(equipo, tempo)  
+print(eqq)
+```
+
+## Saldo de Viernes por Jugador
+
+Puntos por jugada -noche de viernes por jugador durante verano y otoño de 2025.
+
+```{r, fig.width=8, fig.height=4, fig.align='center'}
+#| echo: false
+#| warning: false
+#| message: false
+
+###################################
+## Saldo por partida y jugador   ##
+## Violin plot distribution cool ##
+###################################
+# get median values
+median_values <- aggregate(Saldo ~ Jugador, data = box_df, FUN = median)
+
+# filter outliers
+box_outliers <- box_df %>% 
+  filter(abs(Saldo) > 10)
+
+# create plot
+bx <- saldo_box(box_df, box_outliers, tempo)
+print(bx)
+
+```
