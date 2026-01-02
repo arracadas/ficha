@@ -457,7 +457,7 @@ juegos_puntos <- function(dframe, tempo) {
       ,family = "engle"
       ,nudge_x = 0.3
     ) +
-    scale_y_continuous(breaks = -8:8) +
+    scale_y_continuous(breaks = -10:10) +
     # remove legend for size
     guides(size = "none")
   

@@ -17,7 +17,7 @@ library(patchwork)
 ## Data set: ficha datos trend     ##
 #####################################
 # define season's path
-path <- "./data/20252_spring/"
+path <- "./data/20253_summer/"
 
 # load trend data
 partida <- read_csv(paste0(path, "ficha_datos_trend.csv"))

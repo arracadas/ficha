@@ -1,7 +1,7 @@
 ##########################################
 ## Ficha Night Domino                   ##
 ## Summary of statistics for the season ##
-## Last season:  Winter 2024            ##
+## Last season:  Summer 2025            ##
 ## April 2025, jortega                  ##
 ##                                      ##
 ##########################################
@@ -34,13 +34,13 @@ font_add_google("Englebert", "engle")  # labels
 showtext_auto()
 
 # temporada
-tempo <- "Temporada primavera 2025"
+tempo <- "Temporada verano 2025"
 
 ## Load functions
 source("./R/ficha_functions.R")
 
 ## Load data
-path = "./data/20252_spring/"
+path = "./data/20253_summer/"
 partida <- readRDS(paste0(path, "ficha_trend_clean.rds"))  # detail of partida
 corona <- readRDS(paste0(path, "ficha_corona.rds"))       # aggregate data with total de puntos
 box_data <- readRDS(paste0(path, "ficha_box_clean.rds"))  # aggregate data for jugada i.e. ficha night
@@ -48,7 +48,7 @@ equipo <- readRDS(paste0(path, "ficha_equipo.rds"))   # aggregate data for desem
 
 ## Transform data
 # order levels from lowest to highest score
-jugadorx <- c("Piztache", "Jerry", "Rober", "Kilo", "Jorge") 
+jugadorx <- c("Rober", "Kilo", "Jerry", "Piztache", "Jorge") 
 
 # add factor
 partida_df <- partida %>% 
@@ -61,7 +61,7 @@ corona_df <- corona %>%
 
 # add factor
 box_df <- box_data %>%
-  filter(Temporada %in% c("Winter 2025", "Spring 2025")) %>% 
+  filter(Temporada %in% c("Spring 2025", "Summer 2025")) %>% 
   mutate(Jugador = factor(Jugador, levels = jugadorx))
 
 
